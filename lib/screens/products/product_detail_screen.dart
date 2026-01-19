@@ -111,6 +111,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final productToAdd = Product(
       id: _selectedVariant!.id,
       name: _product!.name,
+      category: _product!.categoryName,
       price: _selectedVariant!.price,
       image_url: _product!.imageUrl,
       discount: discount,

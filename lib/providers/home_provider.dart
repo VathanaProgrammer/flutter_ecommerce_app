@@ -8,7 +8,8 @@ class HomeProvider extends ChangeNotifier {
   final HomeRepository repository = HomeRepository();
 
   List<Category> categories = [];
-  List<Product> products = [];
+  List<Product> allProducts = []; // full list
+  List<Product> filteredProducts = []; // filtered by category/search
   Business? business;
 
   String selectedCategory = "All";
@@ -20,28 +21,23 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future<void> init() async {
-    await fetchHomeData();
-  }
-
-  Future<void> fetchHomeData({String? category, String? search}) async {
     loading = true;
     notifyListeners();
 
     try {
-      final data = await repository.fetchHome(
-        category: category,
-        search: search,
-      );
+      final data = await repository.fetchHome();
 
       categories = (data['categories'] as List)
           .map((e) => Category.fromJson(e))
           .toList();
 
-      products = (data['products'] as List)
+      allProducts = (data['products'] as List)
           .map((e) => Product.fromJson(e))
           .toList();
 
       business = Business.fromJson(data['business']);
+
+      applyFilters(); // apply default filter (All + empty search)
     } catch (e) {
       debugPrint("Fetch home data error: $e");
     }
@@ -50,23 +46,31 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void applyFilters() {
+    filteredProducts = allProducts.where((p) {
+      final matchesCategory =
+          selectedCategory == "All" || p.category == selectedCategory;
+      final matchesSearch =
+          searchQuery.isEmpty || p.name.toLowerCase().contains(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    }).toList();
+    notifyListeners();
+  }
+
   /// CATEGORY SELECT
   void selectCategory(String category) {
     selectedCategory = category;
-
-    fetchHomeData(
-      category: category == "All" ? null : category,
-      search: searchQuery.isEmpty ? null : searchQuery,
-    );
+    applyFilters();
   }
 
   /// SEARCH
   void search(String query) {
     searchQuery = query;
+    applyFilters();
+  }
 
-    fetchHomeData(
-      category: selectedCategory == "All" ? null : selectedCategory,
-      search: query.isEmpty ? null : query,
-    );
+  /// REFRESH (pull-to-refresh)
+  Future<void> refreshData() async {
+    await init();
   }
 }

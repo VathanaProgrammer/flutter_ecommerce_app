@@ -3,6 +3,7 @@ class Product {
   final String name;
   final double price;
   final String? image_url;
+  final String? category;
   final Discount? discount;
   final String? sku;
   final Map<String, String>?
@@ -14,6 +15,7 @@ class Product {
     required this.price,
     this.image_url,
     this.discount,
+    required this.category,
     this.sku,
     this.attributes,
   });
@@ -32,6 +34,7 @@ class Product {
     return Product(
       id: json['id'],
       name: json['name'],
+      category: json['category'],
       price: (json['price'] as num).toDouble(),
       image_url: json['image_url'],
       discount: json['discount'] != null
