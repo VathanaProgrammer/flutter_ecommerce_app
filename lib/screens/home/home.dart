@@ -1,4 +1,5 @@
 import 'package:ecommersflutter_new/providers/cart_provider.dart';
+import 'package:ecommersflutter_new/screens/order/order_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './../../providers/home_provider.dart';
@@ -23,6 +24,11 @@ class _HomeScreenState extends State<HomeScreen> {
         context,
         MaterialPageRoute(builder: (_) => const ProfileScreen()),
       );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const OrdersScreen()),
+      );
     } else {
       setState(() {
         _selectedIndex = index;
@@ -33,17 +39,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => HomeProvider(), // init() runs automatically
+      create: (_) => HomeProvider(),
       child: Consumer<HomeProvider>(
         builder: (context, provider, _) {
           return Scaffold(
             backgroundColor: const Color(0xFFF8F9FA),
             appBar: provider.loading || provider.business == null
                 ? AppBar(elevation: 0, backgroundColor: Colors.white)
-                : _buildAppBar(provider),
+                : _buildAppBar(),
             bottomNavigationBar: _buildBottomNav(),
             body: _selectedIndex == 0
-                ? _buildHomeBody(provider)
+                ? _buildHomeBody()
                 : _selectedIndex == 1
                 ? _buildWishlistPage()
                 : _selectedIndex == 2
@@ -56,39 +62,40 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ==================== APP BAR ====================
-  // ==================== APP BAR ====================
-  PreferredSizeWidget _buildAppBar(HomeProvider? provider) {
+  PreferredSizeWidget _buildAppBar() {
     return AppBar(
       elevation: 0,
       backgroundColor: Colors.white,
       toolbarHeight: 70,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            provider?.business?.name ?? "",
-            style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Row(
-            children: const [
-              Icon(Icons.location_on, size: 14, color: Colors.grey),
-              SizedBox(width: 4),
-              Text(
-                'Phnom Penh, Cambodia',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                  fontWeight: FontWeight.normal,
-                ),
+      title: Consumer<HomeProvider>(
+        builder: (context, provider, _) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              provider.business?.name ?? "",
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 2),
+            Row(
+              children: const [
+                Icon(Icons.location_on, size: 14, color: Colors.grey),
+                SizedBox(width: 4),
+                Text(
+                  'Phnom Penh, Cambodia',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
       actions: [
         // Search Icon
@@ -103,6 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {},
           ),
         ),
+
         // Cart Icon with Badge
         Consumer<CartProvider>(
           builder: (context, cart, _) => Container(
@@ -209,35 +217,44 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHomeBody(HomeProvider provider) {
-  return RefreshIndicator(
-    onRefresh: provider.refreshData,
-    child: ListView(
-      padding: const EdgeInsets.only(top: 16, bottom: 24),
-      children: [
-        _buildSearchBar(provider),
-        const SizedBox(height: 20),
-        _buildPromoCard(),
-        const SizedBox(height: 24),
-        _buildSectionHeader('Categories', onSeeAll: () {}),
-        const SizedBox(height: 12),
-        _buildCategoryRow(provider),
-        const SizedBox(height: 24),
-        _buildSectionHeader(
-          'Flash Sale',
-          onSeeAll: () {},
-          trailing: _buildCountdown(),
-        ),
-        const SizedBox(height: 12),
-        _buildFlashSaleRow(provider),
-        const SizedBox(height: 24),
-        _buildSectionHeader('All Products', onSeeAll: () {}),
-        const SizedBox(height: 12),
-        _buildProductGrid(provider),
-      ],
-    ),
-  );
-}
+  // ==================== HOME BODY ====================
+  Widget _buildHomeBody() {
+    return Consumer<HomeProvider>(
+      builder: (context, provider, _) {
+        if (provider.loading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return RefreshIndicator(
+          onRefresh: provider.refreshData,
+          child: ListView(
+            padding: const EdgeInsets.only(top: 16, bottom: 24),
+            children: [
+              _buildSearchBar(),
+              const SizedBox(height: 20),
+              _buildPromoCard(),
+              const SizedBox(height: 24),
+              _buildSectionHeader('Categories', onSeeAll: () {}),
+              const SizedBox(height: 12),
+              _buildCategoryRow(),
+              const SizedBox(height: 24),
+              _buildSectionHeader(
+                'Flash Sale',
+                onSeeAll: () {},
+                trailing: _buildCountdown(),
+              ),
+              const SizedBox(height: 12),
+              _buildFlashSaleRow(),
+              const SizedBox(height: 24),
+              _buildSectionHeader('All Products', onSeeAll: () {}),
+              const SizedBox(height: 12),
+              _buildProductGrid(),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   // ==================== SEARCH BAR ====================
   Widget _buildSearchBar() {
@@ -282,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
-        constraints: const BoxConstraints(minHeight: 160),
+        height: 201,
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFF2C3E50), Color(0xFF000000)],
@@ -300,7 +317,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: Stack(
           children: [
-            // decorative circles
+            // background circle 1
             Positioned(
               right: -30,
               top: -30,
@@ -313,6 +330,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+
+            // background circle 2
             Positioned(
               right: 40,
               bottom: -20,
@@ -325,30 +344,51 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            // RIGHT SIDE IMAGE
+
+            // 👉 IMAGE ON THE RIGHT
             Positioned(
-              right: 40,
+              right: 20,
               top: 20,
               bottom: -30,
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Image.asset(
-                  'assets/images/promo.png',
+                  'images/promo.png',
                   height: 250,
                   fit: BoxFit.contain,
                 ),
               ),
             ),
-            // TEXT + BUTTON
+
+            // TEXT CONTENT
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 150, 24),
+              padding: const EdgeInsets.fromLTRB(24, 24, 140, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'LIMITED OFFER',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   const Text(
                     'Flash Sale',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 28,
@@ -360,10 +400,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     'Up to 50% OFF',
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),
-                  const SizedBox(height: 16),
+                  const Spacer(),
                   ElevatedButton(
                     onPressed: () {},
-                    child: const Text('Shop Now'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Shop Now',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),
@@ -462,6 +516,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return Consumer<HomeProvider>(
       builder: (context, provider, _) {
         final flashProducts = provider.filteredProducts.take(5).toList();
+
+        if (flashProducts.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
         return SizedBox(
           height: 220,
           child: ListView.separated(
@@ -471,16 +530,94 @@ class _HomeScreenState extends State<HomeScreen> {
             separatorBuilder: (_, __) => const SizedBox(width: 12),
             itemBuilder: (_, index) {
               final p = flashProducts[index];
-              return ProductCard(
-                id: p.id,
-                name: p.name,
-                discount: p.discount != null
-                    ? p.discount!.isPercentage
-                          ? "${p.discount!.value}% OFF"
-                          : "\$${p.discount!.value} OFF"
-                    : "No Discount",
-                price: p.price,
-                image: p.image_url!,
+              return Container(
+                width: 150,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(16),
+                          ),
+                          child: Image.network(
+                            p.image_url ?? '',
+                            height: 120,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              height: 120,
+                              color: Colors.grey[200],
+                              child: const Icon(Icons.image, size: 40),
+                            ),
+                          ),
+                        ),
+                        if (p.discount != null)
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                p.discount!.isPercentage
+                                    ? '-${p.discount!.value}%'
+                                    : '-\$${p.discount!.value}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            p.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '\$${p.price.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -493,6 +630,18 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildProductGrid() {
     return Consumer<HomeProvider>(
       builder: (context, provider, _) {
+        if (provider.filteredProducts.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.all(32),
+            child: Center(
+              child: Text(
+                'No products found',
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            ),
+          );
+        }
+
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: GridView.builder(
@@ -516,7 +665,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           : "\$${p.discount!.value} OFF"
                     : "No Discount",
                 price: p.price,
-                image: p.image_url!,
+                image: p.image_url ?? '',
               );
             },
           ),
