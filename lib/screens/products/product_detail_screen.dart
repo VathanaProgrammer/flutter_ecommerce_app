@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../models/ProductDetail.dart';
 import '../../models/product.dart';
 import '../../services/product_service.dart';
+import 'package:flutter/cupertino.dart';
 import '../../providers/cart_provider.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -172,8 +173,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+      leading: CupertinoButton(
+        padding: EdgeInsets.zero,
+        child: const Icon(CupertinoIcons.back, color: Colors.black),
         onPressed: () => Navigator.pop(context),
       ),
       flexibleSpace: FlexibleSpaceBar(
@@ -181,7 +183,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           color: Colors.white,
           child: _product!.imageUrl != null
               ? Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.only(
+                    top: 40,
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                  ),
                   child: Image.network(
                     _product!.imageUrl!,
                     fit: BoxFit.contain,

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/cart_provider.dart';
 import './checkout_screen.dart';
+import 'package:flutter/cupertino.dart';
+import './../../providers/user_provider.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -13,8 +15,9 @@ class CartScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Icon(CupertinoIcons.back),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -74,7 +77,42 @@ class CartScreen extends StatelessWidget {
                 shipping_charge: 1.50,
                 subtotal: cart.subtotal,
                 total: cart.total,
-                onCheckout: () {
+                onCheckout: () async {
+                  final userProvider = Provider.of<UserProvider>(
+                    context,
+                    listen: false,
+                  );
+                  final user = userProvider.user;
+
+                  if (user == null) {
+                    if (!context.mounted) return;
+
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('Login Required'),
+                        content: const Text(
+                          'You need to login before proceeding to checkout.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              Navigator.pushNamed(context, '/login');
+                            },
+                            child: const Text('Login'),
+                          ),
+                        ],
+                      ),
+                    );
+                    return;
+                  }
+
+                  // ✅ User is logged in
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const CheckoutScreen()),

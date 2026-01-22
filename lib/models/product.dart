@@ -8,6 +8,9 @@ class Product {
   final String? sku;
   final Map<String, String>?
   attributes; // Add this - stores "Color": "Red", "Size": "M"
+  bool? isFavorite; // ← add this
+  bool? isFeatured;
+  bool? isRecommended;
 
   Product({
     required this.id,
@@ -18,6 +21,9 @@ class Product {
     required this.category,
     this.sku,
     this.attributes,
+    this.isFavorite,
+    this.isFeatured,
+    this.isRecommended,
   });
 
   double get finalPrice {
@@ -44,6 +50,9 @@ class Product {
       attributes: json['attributes'] != null
           ? Map<String, String>.from(json['attributes'])
           : null,
+      isFavorite: json['is_favorite'] ?? false,
+      isFeatured: json['is_featured'] ?? false,
+      isRecommended: json['is_recommended'] ?? false,
     );
   }
 }

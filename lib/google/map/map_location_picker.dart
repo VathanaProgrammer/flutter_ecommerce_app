@@ -45,7 +45,6 @@ class _MapLocationPickerState extends State<MapLocationPicker> {
       setState(() => _selectedLocation = newLocation);
       await _getAddressFromLatLng(newLocation);
     } catch (e) {
-      print('Error getting location: $e');
       await _getAddressFromLatLng(_selectedLocation);
     } finally {
       setState(() => _loading = false);

@@ -1,4 +1,5 @@
 import 'package:ecommersflutter_new/providers/cart_provider.dart';
+import 'package:ecommersflutter_new/screens/favorite/favorite_screen.dart';
 import 'package:ecommersflutter_new/screens/order/order_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +8,7 @@ import './../../widgets/product_card.dart';
 import './../../widgets/category_chip.dart';
 import '../../screens/profiles/profile_screen.dart';
 import '../../screens/cart/cart_screen.dart';
+import '../../repositories/favorite_repository.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,6 +30,11 @@ class _HomeScreenState extends State<HomeScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const OrdersScreen()),
+      );
+    } else if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const FavoriteScreen()),
       );
     } else {
       setState(() {
@@ -238,13 +245,13 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 12),
               _buildCategoryRow(),
               const SizedBox(height: 24),
-              _buildSectionHeader(
-                'Flash Sale',
-                onSeeAll: () {},
-                trailing: _buildCountdown(),
-              ),
+              _buildSectionHeader('Featured Products', onSeeAll: () {}),
               const SizedBox(height: 12),
-              _buildFlashSaleRow(),
+              _buildFeaturedRow(),
+              const SizedBox(height: 24),
+              _buildSectionHeader('Recommended', onSeeAll: () {}),
+              const SizedBox(height: 12),
+              _buildRecommendedRow(),
               const SizedBox(height: 24),
               _buildSectionHeader('All Products', onSeeAll: () {}),
               const SizedBox(height: 12),
@@ -465,25 +472,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ==================== COUNTDOWN ====================
-  Widget _buildCountdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: const Text(
-        '02:45:30',
-        style: TextStyle(
-          color: Colors.red,
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-        ),
-      ),
-    );
-  }
-
   // ==================== CATEGORY ROW ====================
   Widget _buildCategoryRow() {
     return Consumer<HomeProvider>(
@@ -511,112 +499,81 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ==================== FLASH SALE ROW ====================
-  Widget _buildFlashSaleRow() {
+  Widget _buildFeaturedRow() {
     return Consumer<HomeProvider>(
       builder: (context, provider, _) {
-        final flashProducts = provider.filteredProducts.take(5).toList();
+        final products = provider.featuredProducts;
 
-        if (flashProducts.isEmpty) {
+        if (products.isEmpty) {
           return const SizedBox.shrink();
         }
 
         return SizedBox(
-          height: 220,
+          height: 300,
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             scrollDirection: Axis.horizontal,
-            itemCount: flashProducts.length,
+            itemCount: products.length,
             separatorBuilder: (_, __) => const SizedBox(width: 12),
             itemBuilder: (_, index) {
-              final p = flashProducts[index];
-              return Container(
-                width: 150,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+              final p = products[index];
+
+              return SizedBox(
+                width: 170,
+                child: ProductCard(
+                  id: p.id,
+                  name: p.name,
+                  price: p.price,
+                  image: p.image_url ?? '',
+                  isFavorite: p.isFavorite ?? false,
+                  discount: p.discount != null
+                      ? p.discount!.isPercentage
+                            ? "${p.discount!.value}% OFF"
+                            : "\$${p.discount!.value} OFF"
+                      : "",
+                  onFavoriteToggle: (_, __) {
+                    provider.toggleFavorite(p);
+                  },
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(16),
-                          ),
-                          child: Image.network(
-                            p.image_url ?? '',
-                            height: 120,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              height: 120,
-                              color: Colors.grey[200],
-                              child: const Icon(Icons.image, size: 40),
-                            ),
-                          ),
-                        ),
-                        if (p.discount != null)
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                p.discount!.isPercentage
-                                    ? '-${p.discount!.value}%'
-                                    : '-\$${p.discount!.value}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            p.name,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '\$${p.price.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRecommendedRow() {
+    return Consumer<HomeProvider>(
+      builder: (context, provider, _) {
+        final products = provider.recommendedProducts;
+
+        if (products.isEmpty) return const SizedBox.shrink();
+
+        return SizedBox(
+          height: 300,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            scrollDirection: Axis.horizontal,
+            itemCount: products.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (_, index) {
+              final p = products[index];
+
+              return SizedBox(
+                width: 170,
+                child: ProductCard(
+                  id: p.id,
+                  name: p.name,
+                  price: p.price,
+                  image: p.image_url ?? '',
+                  isFavorite: p.isFavorite ?? false,
+                  discount: p.discount != null
+                      ? p.discount!.isPercentage
+                            ? "${p.discount!.value}% OFF"
+                            : "\$${p.discount!.value} OFF"
+                      : "",
+                  onFavoriteToggle: (_, __) => provider.toggleFavorite(p),
                 ),
               );
             },
@@ -659,6 +616,7 @@ class _HomeScreenState extends State<HomeScreen> {
               return ProductCard(
                 id: p.id,
                 name: p.name,
+                isFavorite: p.isFavorite ?? false,
                 discount: p.discount != null
                     ? p.discount!.isPercentage
                           ? "${p.discount!.value}% OFF"
@@ -666,6 +624,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     : "No Discount",
                 price: p.price,
                 image: p.image_url ?? '',
+                onFavoriteToggle: (productId, isFav) async {
+                  try {
+                    final favoriteRepository = FavoriteRepository();
+                    if (isFav) {
+                      await favoriteRepository.addFavorite(productId);
+                    } else {
+                      await favoriteRepository.removeFavorite(productId);
+                    }
+                    // Optionally update the local product list
+                    setState(() {
+                      p.isFavorite = isFav;
+                    });
+                  } catch (e) {
+                    print("Failed to update favorite: $e");
+                  }
+                },
               );
             },
           ),

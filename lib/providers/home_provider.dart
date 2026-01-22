@@ -5,18 +5,21 @@ import '../models/category.dart';
 import '../repositories/home_repository.dart';
 
 class HomeProvider extends ChangeNotifier {
-  final HomeRepository repository = HomeRepository();
+  final HomeRepository repository;
 
   List<Category> categories = [];
-  List<Product> allProducts = []; // full list
-  List<Product> filteredProducts = []; // filtered by category/search
+  List<Product> allProducts = [];
+  List<Product> filteredProducts = [];
+  List<Product> featuredProducts = [];
+  List<Product> recommendedProducts = [];
+
   Business? business;
 
   String selectedCategory = "All";
   String searchQuery = "";
   bool loading = true;
 
-  HomeProvider() {
+  HomeProvider({HomeRepository? repo}) : repository = repo ?? HomeRepository() {
     init();
   }
 
@@ -37,7 +40,7 @@ class HomeProvider extends ChangeNotifier {
 
       business = Business.fromJson(data['business']);
 
-      applyFilters(); // apply default filter (All + empty search)
+      applyFilters();
     } catch (e) {
       debugPrint("Fetch home data error: $e");
     }
@@ -51,26 +54,41 @@ class HomeProvider extends ChangeNotifier {
       final matchesCategory =
           selectedCategory == "All" || p.category == selectedCategory;
       final matchesSearch =
-          searchQuery.isEmpty || p.name.toLowerCase().contains(searchQuery.toLowerCase());
+          searchQuery.isEmpty ||
+          p.name.toLowerCase().contains(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     }).toList();
+
+    featuredProducts = allProducts.where((p) => p.isFeatured == true).toList();
+
+    recommendedProducts = allProducts.where((p) => p.isRecommended == true).toList();
+
     notifyListeners();
   }
 
-  /// CATEGORY SELECT
   void selectCategory(String category) {
     selectedCategory = category;
     applyFilters();
   }
 
-  /// SEARCH
   void search(String query) {
     searchQuery = query;
     applyFilters();
   }
 
-  /// REFRESH (pull-to-refresh)
   Future<void> refreshData() async {
     await init();
+  }
+
+  /// FAVORITES
+  void toggleFavorite(Product product) {
+    product.isFavorite = !(product.isFavorite ?? false);
+    notifyListeners();
+    // You can also call FavoriteRepository to sync with server
+    if (product.isFavorite == true) {
+      repository.favoriteRepository.addFavorite(product.id);
+    } else {
+      repository.favoriteRepository.removeFavorite(product.id);
+    }
   }
 }

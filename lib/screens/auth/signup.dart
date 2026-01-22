@@ -11,10 +11,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool isPasswordHidden = true;
   bool isConfirmHidden = true;
 
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8EE),
+      backgroundColor: const Color(0xFFF4F5F7), // Home page background
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -27,70 +32,49 @@ class _SignUpScreenState extends State<SignUpScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-
-              // Title
               const Text(
                 "Create Account",
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               const Text(
                 "Sign up to get started!",
                 style: TextStyle(color: Colors.grey),
               ),
-
               const SizedBox(height: 32),
 
               // Full Name
               const Text("Full Name"),
               const SizedBox(height: 8),
               TextField(
-                decoration: InputDecoration(
-                  hintText: "John Doe",
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+                controller: nameController,
+                decoration: _inputDecoration("John Doe"),
               ),
-
               const SizedBox(height: 20),
 
               // Email
               const Text("Email"),
               const SizedBox(height: 8),
               TextField(
+                controller: emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: "example@gmail.com",
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+                decoration: _inputDecoration("example@gmail.com"),
               ),
-
               const SizedBox(height: 20),
 
               // Password
               const Text("Password"),
               const SizedBox(height: 8),
               TextField(
+                controller: passwordController,
                 obscureText: isPasswordHidden,
-                decoration: InputDecoration(
-                  hintText: "********",
-                  filled: true,
-                  fillColor: Colors.white,
-                  suffixIcon: IconButton(
+                decoration: _inputDecoration(
+                  "********",
+                  suffix: IconButton(
                     icon: Icon(
                       isPasswordHidden
                           ? Icons.visibility_off
@@ -102,29 +86,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       });
                     },
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
-                  ),
                 ),
               ),
-
               const SizedBox(height: 20),
 
               // Confirm Password
               const Text("Confirm Password"),
               const SizedBox(height: 8),
               TextField(
+                controller: confirmController,
                 obscureText: isConfirmHidden,
-                decoration: InputDecoration(
-                  hintText: "********",
-                  filled: true,
-                  fillColor: Colors.white,
-                  suffixIcon: IconButton(
+                decoration: _inputDecoration(
+                  "********",
+                  suffix: IconButton(
                     icon: Icon(
-                      isConfirmHidden
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                      isConfirmHidden ? Icons.visibility_off : Icons.visibility,
                     ),
                     onPressed: () {
                       setState(() {
@@ -132,13 +108,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       });
                     },
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
-                  ),
                 ),
               ),
-
               const SizedBox(height: 28),
 
               // Sign Up Button
@@ -147,21 +118,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: Colors.black, // Home page button color
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
                   onPressed: () {
-                    // TODO: Sign up logic
+                    // TODO: Add sign up logic here
                   },
                   child: const Text(
                     "Sign Up",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
               ),
-
               const SizedBox(height: 32),
 
               // Back to Login
@@ -186,6 +156,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint, {Widget? suffix}) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.white, // flat white input like Home page
+      suffixIcon: suffix,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(30),
+        borderSide: BorderSide.none, // no border/shadow
       ),
     );
   }

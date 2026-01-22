@@ -1,3 +1,4 @@
+import 'package:ecommersflutter_new/screens/auth/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../home/home.dart';
@@ -25,9 +26,10 @@ class _LoginScreenState extends State<LoginScreen> {
       ..clearSnackBars()
       ..showSnackBar(
         SnackBar(
-          behavior: SnackBarBehavior.fixed, // 🔒 NEVER floating
-          backgroundColor:
-              isError ? Colors.red.shade600 : Colors.green.shade600,
+          behavior: SnackBarBehavior.fixed,
+          backgroundColor: isError
+              ? Colors.red.shade600
+              : Colors.green.shade600,
           duration: const Duration(seconds: 3),
           content: Row(
             children: [
@@ -60,9 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => isLoading = true);
 
     try {
-      final userProvider =
-          Provider.of<UserProvider>(context, listen: false);
-
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
       final success = await userProvider.login(username, password);
 
       if (!mounted) return;
@@ -78,19 +78,16 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       showMessage('Unexpected error: $e');
     } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-      key: _messengerKey, // ✅ LOCAL messenger (THIS fixes the error)
+      key: _messengerKey,
       child: Scaffold(
-        resizeToAvoidBottomInset: true,
-        backgroundColor: const Color(0xFFFFF8EE),
+        backgroundColor: const Color(0xFFF4F5F7), // Home page bg
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -107,8 +104,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 20),
                   const Text(
                     "Welcome Back",
-                    style:
-                        TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const Text(
@@ -121,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: usernameController,
-                    decoration: _inputDecoration("username"),
+                    decoration: _inputDecoration("Enter username"),
                   ),
 
                   const SizedBox(height: 20),
@@ -131,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: passwordController,
                     obscureText: isPasswordHidden,
                     decoration: _inputDecoration(
-                      "********",
+                      "Enter password",
                       suffix: IconButton(
                         icon: Icon(
                           isPasswordHidden
@@ -154,15 +154,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: isLoading ? null : login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
+                        backgroundColor: Colors.black, // Home-style button
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
                       child: isLoading
-                          ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
+                          ? const CircularProgressIndicator(color: Colors.white)
                           : const Text(
                               "Log In",
                               style: TextStyle(fontSize: 16),
@@ -177,7 +175,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       const Text("Don't have an account? "),
                       GestureDetector(
                         onTap: () {
-                          Navigator.pushNamed(context, '/signup');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SignUpScreen(),
+                            ),
+                          );
                         },
                         child: const Text(
                           "Sign Up",
@@ -202,8 +205,9 @@ class _LoginScreenState extends State<LoginScreen> {
     return InputDecoration(
       hintText: hint,
       filled: true,
-      fillColor: Colors.white,
+      fillColor: Colors.white, // No shadow, plain white like Home page inputs
       suffixIcon: suffix,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(30),
         borderSide: BorderSide.none,

@@ -6,6 +6,7 @@ import '../../services/qr_payment_service.dart';
 import '../../google/map/map_location_picker.dart';
 import '../payments/payment_completed_screen.dart';
 import '../payments/cash_payment_completed_screen.dart';
+import 'package:flutter/cupertino.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -153,6 +154,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     try {
       final isPaid = await QRPaymentService.autoPayAfter2Sec(_tranId!);
       if (isPaid) {
+        final cart = context.read<CartProvider>();
+        cart.clear();
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -245,6 +248,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       final message = result['output'][0]['message'] as String;
 
       if (isSuccess) {
+        final cart = context.read<CartProvider>();
+        cart.clear(); // ✅ CLEAR IT
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -298,8 +303,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Icon(CupertinoIcons.back),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(

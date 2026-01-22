@@ -12,6 +12,12 @@ class User {
   final String role; // admin, staff, customer
   final String? token; // optional, if backend sends auth token
 
+  // NEW FIELDS
+  final String? phone;
+  final String? city;
+  final String? address;
+  final int profileCompletion; // 0-100
+
   User({
     required this.id,
     required this.email,
@@ -25,6 +31,10 @@ class User {
     this.username,
     required this.role,
     this.token,
+    this.phone,
+    this.city,
+    this.address,
+    this.profileCompletion = 0,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -43,6 +53,10 @@ class User {
       username: json['username'],
       role: json['role'] ?? 'customer',
       token: json['token'], // optional
+      phone: json['phone'],
+      city: json['city'],
+      address: json['address'],
+      profileCompletion: json['profile_completion'] ?? 0,
     );
   }
 
@@ -60,8 +74,16 @@ class User {
       'username': username,
       'role': role,
       'token': token,
+      'phone': phone,
+      'city': city,
+      'address': address,
+      'profile_completion': profileCompletion,
     };
   }
 
-  String get fullName => '$prefix ${firstName} ${lastName}';
+  String get fullName {
+    final pfx = prefix != null ? '$prefix ' : '';
+    final lName = lastName != null ? ' $lastName' : '';
+    return '$pfx$firstName$lName';
+  }
 }

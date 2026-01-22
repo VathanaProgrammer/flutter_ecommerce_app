@@ -62,12 +62,15 @@ class Api {
     await prefs.remove(userKey);
   }
 
+
   static Future<Map<String, dynamic>> getHomeData({
     String? category,
     String? search,
   }) async {
+    final userObj = await getCurrentUser();
+    final userId = userObj?.id;
     final uri = Uri.parse(
-      '$baseUrl/home?category=${category ?? ""}&search=${search ?? ""}',
+      '$baseUrl/home?category=${category ?? ""}&search=${search ?? ""}&user_id=${userId ?? ''}',
     );
     final response = await http.get(uri);
 
