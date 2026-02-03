@@ -9,6 +9,9 @@ import './../../widgets/category_chip.dart';
 import '../../screens/profiles/profile_screen.dart';
 import '../../screens/cart/cart_screen.dart';
 import '../../repositories/favorite_repository.dart';
+import '../../screens/search/search_screen.dart';
+import '../../screens/notifications/notification_screen.dart';
+import '../../services/notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +22,22 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  int _unreadNotificationCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUnreadNotificationCount();
+  }
+
+  Future<void> _loadUnreadNotificationCount() async {
+    final count = await NotificationService.getUnreadCount();
+    if (mounted) {
+      setState(() {
+        _unreadNotificationCount = count;
+      });
+    }
+  }
 
   void _onBottomNavTap(int index) {
     if (index == 3) {
@@ -114,7 +133,68 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: IconButton(
             icon: const Icon(Icons.search, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SearchScreen()),
+              );
+            },
+          ),
+        ),
+
+        // Notification Icon with Badge
+        Container(
+          margin: const EdgeInsets.only(right: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F9FA),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Stack(
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.notifications_outlined,
+                  color: Colors.black,
+                ),
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationScreen(),
+                    ),
+                  );
+                  // Refresh notification count after returning
+                  _loadUnreadNotificationCount();
+                },
+              ),
+              if (_unreadNotificationCount > 0)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Text(
+                      _unreadNotificationCount > 99
+                          ? '99+'
+                          : '$_unreadNotificationCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
 

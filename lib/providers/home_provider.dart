@@ -60,8 +60,9 @@ class HomeProvider extends ChangeNotifier {
     }).toList();
 
     featuredProducts = allProducts.where((p) => p.isFeatured == true).toList();
-
-    recommendedProducts = allProducts.where((p) => p.isRecommended == true).toList();
+    recommendedProducts = allProducts
+        .where((p) => p.isRecommended == true)
+        .toList();
 
     notifyListeners();
   }
@@ -80,11 +81,10 @@ class HomeProvider extends ChangeNotifier {
     await init();
   }
 
-  /// FAVORITES
   void toggleFavorite(Product product) {
     product.isFavorite = !(product.isFavorite ?? false);
     notifyListeners();
-    // You can also call FavoriteRepository to sync with server
+
     if (product.isFavorite == true) {
       repository.favoriteRepository.addFavorite(product.id);
     } else {

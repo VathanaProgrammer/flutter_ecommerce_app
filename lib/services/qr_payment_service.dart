@@ -15,10 +15,7 @@ class QRPaymentService {
     final body = {'user_id': currentUser.id, 'payload': payloadSnapshot};
 
     final response = await http.post(
-      Uri.parse('$baseUrl/create-qr'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(body),
-    );
+      Uri.parse('$baseUrl/create-qr'),headers: {'Content-Type': 'application/json'}, body: jsonEncode(body),);
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception(response.body);

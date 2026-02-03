@@ -5,6 +5,7 @@ import '../models/user.dart'; // Make sure this path is correct
 
 class Api {
   static const String baseUrl = 'https://learner-teach.online/api';
+
   static const String userKey = 'current_user';
 
   // Login
@@ -62,6 +63,46 @@ class Api {
     await prefs.remove(userKey);
   }
 
+  // Update user profile
+  static Future<User?> updateUserProfile(
+    int userId,
+    Map<String, dynamic> data,
+  ) async {
+    final url = Uri.parse('$baseUrl/user/profile/$userId');
+
+    try {
+      print('=> Sending update request to: $url');
+      print('=> Data: $data');
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data),
+      );
+
+      print('=> Response status: ${response.statusCode}');
+      print('=> Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+
+        if (body['success'] == true && body['user'] != null) {
+          final user = User.fromJson(body['user']);
+
+          // Update saved user locally
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(userKey, jsonEncode(user.toJson()));
+
+          return user;
+        }
+      }
+      print('=> Update failed: Status ${response.statusCode}');
+      return null;
+    } catch (e) {
+      print('Update profile error: $e');
+      return null;
+    }
+  }
 
   static Future<Map<String, dynamic>> getHomeData({
     String? category,

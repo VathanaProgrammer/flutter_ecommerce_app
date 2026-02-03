@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/user_provider.dart';
 import '../auth/login.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -105,6 +106,17 @@ class ProfileScreen extends StatelessWidget {
           child: const Icon(CupertinoIcons.back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit, color: Colors.black),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+              );
+            },
+          ),
+        ],
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SingleChildScrollView(

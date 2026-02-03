@@ -9,27 +9,33 @@ class UserProvider extends ChangeNotifier {
   bool get isLoggedIn => _user != null;
 
   Future<bool> login(String username, String password) async {
-    debugPrint('=> LOGIN STARTED: $username');
-
     final user = await Api.login(username, password);
 
     if (user != null) {
-      debugPrint('=> API returned user: ${user.toJson()}');
-
       _user = user;
       notifyListeners();
-
-      debugPrint('=> USER STORED IN PROVIDER');
       return true;
     }
 
-    debugPrint('=> LOGIN FAILED: user is null');
     return false;
   }
 
   void logout() {
-    debugPrint('=> USER LOGOUT');
     _user = null;
     notifyListeners();
+  }
+
+  Future<bool> updateProfile(Map<String, dynamic> data) async {
+    if (_user == null) return false;
+
+    final updatedUser = await Api.updateUserProfile(_user!.id, data);
+
+    if (updatedUser != null) {
+      _user = updatedUser;
+      notifyListeners();
+      return true;
+    }
+
+    return false;
   }
 }

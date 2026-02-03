@@ -46,7 +46,9 @@ class User {
       lastName: json['last_name'],
       gender: json['gender'],
       profileImageUrl: json['profile_image_url'],
-      isActive: json['is_active'] ?? true,
+      isActive: json['is_active'] is int
+          ? json['is_active'] == 1
+          : (json['is_active'] ?? true),
       lastLogin: json['last_login'] != null
           ? DateTime.parse(json['last_login'])
           : null,
